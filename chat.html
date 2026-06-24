@@ -79,7 +79,7 @@ body{margin:0;background:var(--canvas);color:var(--text);font-family:var(--sans)
 
 
 /* conversation */
-.scroll{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.scroll{flex:1;overflow-y:auto}
 .thread{max-width:716px;margin:0 auto;padding:26px 20px 30px;display:flex;flex-direction:column;gap:7px}
 
 .turn{animation:rise .34s cubic-bezier(.2,.7,.2,1) both}
@@ -430,6 +430,7 @@ body{margin:0;background:var(--canvas);color:var(--text);font-family:var(--sans)
         <div class="plan-counts">
           <span class="pc" id="pc-serv"><span class="pic" id="pic-serv"></span><b>0</b>&nbsp;Services</span>
           <span class="pc" id="pc-inst"><span class="pic" id="pic-inst"></span><b>0</b>&nbsp;Instructions</span>
+          <span class="pc pc-cost" id="pc-cost"><span class="pic" id="pic-cost"></span><b>$0.00</b>&nbsp;Total</span>
         </div>
       </div>
       <div class="plan-body" id="plan-body"><div class="plan-list" id="plan-list"></div></div>
@@ -482,8 +483,16 @@ var MODELNAME = MODELS[MODELIDX].name;
 /* helpers */
 var thread=document.getElementById('thread'),scroll=document.getElementById('scroll');
 var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms);});};
-function low(){return scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight<140;}
-function down(){scroll.scrollTop=scroll.scrollHeight;}
+/* stick-to-bottom: follow the build as pieces stream in, unless the user scrolls up */
+var stick=true, lastAuto=0;
+scroll.addEventListener('scroll',function(){
+  if((performance.now?performance.now():+new Date())-lastAuto<400) return; /* ignore our own (smooth) auto-scrolls */
+  stick = (scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight) < 160;
+});
+scroll.addEventListener('wheel',function(e){ if(e.deltaY<0) stick=false; },{passive:true}); /* scrolling up pauses follow immediately */
+scroll.addEventListener('touchmove',function(){ stick = (scroll.scrollHeight-scroll.scrollTop-scroll.clientHeight) < 160; },{passive:true});
+function low(){ return stick; }
+function down(){ lastAuto=(performance.now?performance.now():+new Date()); scroll.scrollTop=scroll.scrollHeight; }
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
 var ZSVG='<svg viewBox="0 0 30 30" fill="currentColor"><path d="M25.3126 4.09945C24.5359 3.32276 23.6216 2.73844 22.6099 2.33997C26.5706 6.31261 25.3024 14.009 19.7739 19.5377C14.2416 25.0699 6.53831 26.3368 2.56784 22.3668C2.39259 22.1916 2.22834 22.0078 2.07342 21.8186C2.45528 23.1466 3.12507 24.3382 4.09944 25.3127C8.26506 29.4783 16.3909 28.1065 22.2487 22.2488C28.1066 16.3909 29.4783 8.26509 25.3126 4.09945ZM20.5984 5.51435C17.8647 2.78083 12.2721 3.94128 8.10661 8.10662C3.94128 12.2721 2.78014 17.8654 5.51366 20.5991C6.77813 21.8635 8.65451 22.2934 10.7182 21.9794C10.1406 21.7422 9.6154 21.4014 9.16658 20.9526C6.75857 18.5445 7.44432 13.9539 10.6982 10.6996C13.9525 7.44526 18.5436 6.75914 20.9519 9.16728C21.4007 9.61605 21.7422 10.1407 21.9794 10.7182C22.2933 8.65458 21.8627 6.7788 20.5984 5.51435Z"/></svg>';
 var CHK='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6.5 5,9 10,3"/></svg>';
@@ -694,13 +703,14 @@ var ZHOST={
   'rapidruntime.com':{cap:'Run Job',prov:'rapidruntime',method:'POST',ep:'/v1/run',desc:'Run a tool or job',rating:'4.5',up:'97%',unit:'/job'}
 };
 var PLAN={s:0,i:0,n:0,shown:false};
-(function(){ var a=document.getElementById('pic-serv'), b=document.getElementById('pic-inst'); if(a)a.innerHTML=IC_CAP; if(b)b.innerHTML=IC_DOC; })();
+var IC_COIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2A2.7 2.2 0 0 0 12 8c-1.5 0-2.6.8-2.6 1.8 0 2.4 5.2 1.4 5.2 4 0 1-1.2 1.9-2.6 1.9a2.7 2.2 0 0 1-2.5-1.2"/><path d="M12 6.6v1.4M12 16v1.4"/></svg>';
+(function(){ var a=document.getElementById('pic-serv'), b=document.getElementById('pic-inst'), d=document.getElementById('pic-cost'); if(a)a.innerHTML=IC_CAP; if(b)b.innerHTML=IC_DOC; if(d)d.innerHTML=IC_COIN; })();
 function revealPlan(){ if(PLAN.shown) return; PLAN.shown=true; var w=document.getElementById('workspace'); if(w)w.classList.add('show-plan'); planPrompt(PROMPT); }
 function planCounts(){ var s=document.querySelector('#pc-serv b'), i=document.querySelector('#pc-inst b'); if(s)s.textContent=PLAN.s; if(i)i.textContent=PLAN.i; }
-function planNode(html, cls){ var list=document.getElementById('plan-list'); if(!list) return; PLAN.n++; var n=document.createElement('div'); n.className='pnode'+(cls?' '+cls:''); n.innerHTML='<span class="pnum">'+PLAN.n+'</span>'+html; list.appendChild(n); var body=document.getElementById('plan-body'); if(body) body.scrollTop=body.scrollHeight; }
+function planNode(html, cls){ var list=document.getElementById('plan-list'); if(!list) return; PLAN.n++; var n=document.createElement('div'); n.className='pnode'+(cls?' '+cls:''); n.innerHTML='<span class="pnum">'+PLAN.n+'</span>'+html; list.appendChild(n); var ct=document.querySelector('#pc-cost b'); if(ct)ct.textContent='$'+spent.toFixed(2); var body=document.getElementById('plan-body'); if(body) body.scrollTop=body.scrollHeight; }
 function planPrompt(text){
   planNode('<div class="pcard pcard-prompt"><div class="pcard-top">'+
-    '<div class="pcard-row1"><div class="pcard-name">Prompt</div></div>'+
+    '<div class="pcard-row1"><div class="pcard-name">Starting prompt</div></div>'+
     '<div class="pbadges"><span class="pbadge">'+IC_PROMPT+'Prompt</span></div></div>'+
     '<div class="pcard-foot inst"><span class="ptext pt3">'+esc(text)+'</span></div></div>', 'io');
 }
@@ -726,11 +736,8 @@ function planService(z, price){
 }
 function planInstruction(cfg){
   revealPlan(); PLAN.i++;
-  var price = (cfg.cost!=null)
-    ? '<div class="pcard-price">$'+Number(cfg.cost).toFixed(3)+(cfg.tokens?'<small>'+esc(cfg.tokens)+' tokens</small>':'<small>/msg</small>')+'</div>'
-    : (cfg.tokens?'<div class="pcard-price">'+esc(cfg.tokens)+'<small>/tokens</small></div>':'');
   planNode('<div class="pcard"><div class="pcard-top">'+
-      '<div class="pcard-row1"><div class="pcard-name">'+esc(cfg.title)+'</div>'+price+'</div>'+
+      '<div class="pcard-row1"><div class="pcard-name">'+esc(cfg.title)+'</div></div>'+
       '<div class="pbadges"><span class="pbadge">'+IC_DOC+'Instruction</span></div></div>'+
     '<div class="pcard-foot inst"><span class="plabel">'+esc(cfg.label||'System Prompt')+'</span><span class="ptext">'+esc(cfg.text)+'</span></div></div>');
   planCounts();
