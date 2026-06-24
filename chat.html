@@ -508,22 +508,28 @@ function grantWallet(cb){ granted=true; var t0=null, ended=false;
 function confettiBurst(ox, oy){
   var colors=['#1B561A','#2E7D32','#3FA34D','#52B788','#5FBF6B','#74C476','#8FD694','#A5D6A7','#C8E6C9'];
   var wrap=document.createElement('div'); wrap.className='confetti-wrap'; document.body.appendChild(wrap);
-  var cx=(ox!=null?ox:window.innerWidth/2), cy=(oy!=null?oy:window.innerHeight*0.42);
-  for(var i=0;i<130;i++){
+  var cx=(ox!=null?ox:window.innerWidth/2), cy=(oy!=null?oy:window.innerHeight*0.42), vh=window.innerHeight;
+  var R=function(a,b){ return a+Math.random()*(b-a); };
+  for(var i=0;i<90;i++){
     var p=document.createElement('i'); p.style.background=colors[i%colors.length];
-    var sz=5+Math.random()*7; p.style.width=sz+'px'; p.style.height=(sz*(0.7+Math.random()*0.7)).toFixed(1)+'px';
+    var sz=R(4,10); p.style.width=sz.toFixed(1)+'px'; p.style.height=(sz*R(0.6,1.3)).toFixed(1)+'px';
     p.style.left=cx+'px'; p.style.top=cy+'px'; if(i%3===0) p.style.borderRadius='50%';
-    var ang=Math.random()*Math.PI*2, vel=120+Math.random()*300;
-    var dx=Math.cos(ang)*vel, dy=Math.sin(ang)*vel-(150+Math.random()*140);
-    var fall=window.innerHeight*0.72+Math.random()*220, rot=(Math.random()*8-4)*360;
+    /* fan upward & out, decelerate to a peak, then drift down with gentle sway + spin */
+    var ang=-Math.PI/2 + (Math.random()-0.5)*2.3, vel=R(80,290);
+    var px=Math.cos(ang)*vel, py=Math.sin(ang)*vel;          /* peak offset (py<0 = up) */
+    var sway=(Math.random()-0.5)*90, fall=vh*0.5+Math.random()*vh*0.4;
+    var r1=(Math.random()*2-1)*160, r2=r1+(Math.random()*2-1)*220, peak=R(0.78,1);
+    var dur=2600+Math.random()*1600, delay=Math.random()*200;
     p.animate([
-      {transform:'translate(0,0) rotate(0deg)',opacity:1},
-      {transform:'translate('+dx+'px,'+dy+'px) rotate('+(rot*.5)+'deg)',opacity:1,offset:.34},
-      {transform:'translate('+(dx*1.15)+'px,'+(dy+fall)+'px) rotate('+rot+'deg)',opacity:0}
-    ],{duration:2000+Math.random()*1100,easing:'cubic-bezier(.15,.6,.3,1)',fill:'forwards'});
+      {transform:'translate(0px,0px) rotate(0deg)', opacity:0, offset:0,   easing:'cubic-bezier(.16,.84,.3,1)'},
+      {transform:'translate('+(px*0.45).toFixed(1)+'px,'+(py*0.55).toFixed(1)+'px) rotate('+(r1*0.3).toFixed(0)+'deg)', opacity:peak, offset:.14, easing:'cubic-bezier(.33,.7,.4,1)'},
+      {transform:'translate('+px.toFixed(1)+'px,'+py.toFixed(1)+'px) rotate('+r1.toFixed(0)+'deg)', opacity:peak, offset:.38, easing:'cubic-bezier(.5,.02,.62,1)'},
+      {transform:'translate('+(px+sway*0.5).toFixed(1)+'px,'+(py+fall*0.5).toFixed(1)+'px) rotate('+((r1+r2)/2).toFixed(0)+'deg)', opacity:peak, offset:.7, easing:'cubic-bezier(.45,0,.72,1)'},
+      {transform:'translate('+(px+sway).toFixed(1)+'px,'+(py+fall).toFixed(1)+'px) rotate('+r2.toFixed(0)+'deg)', opacity:0, offset:1}
+    ], {duration:dur, delay:delay, fill:'forwards'});
     wrap.appendChild(p);
   }
-  setTimeout(function(){ if(wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 3400);
+  setTimeout(function(){ if(wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 5000);
 }
 
 // Sign-up modal: create account → unlock $5 welcome bonus, then continue the build
