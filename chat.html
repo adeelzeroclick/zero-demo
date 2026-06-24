@@ -753,35 +753,45 @@ function projName(){var p=PROMPT.toLowerCase();
   if(/game|browser/.test(p))return 'Browser game';
   if(/scroll|motion|video|animation/.test(p))return 'Scroll motion';return 'New project';}
 
+/* Zero/AI decision gate — shown on every prompt so the user can sign up & unlock $5 */
+async function gate(cfg){
+  aiTurn();
+  await say(cfg.snag);
+  var choice = await decide({
+    question:'How do you want to proceed?',
+    options:[
+      {v:'zero', title:'Continue with Zero', recommended:true, desc:cfg.zeroDesc},
+      {v:'ai', title:'Continue with '+MODELNAME, desc:cfg.aiDesc}
+    ]
+  });
+  if(choice==='ai'){
+    aiTurn();
+    await say(cfg.ai1);
+    if(cfg.ai2) await say(cfg.ai2);
+    blocker(cfg.blocker);
+    aiTurn();
+    await say(cfg.pivot);
+    await decide({ question:'How do you want to proceed?',
+      options:[{v:'zero', title:'Try with Zero', recommended:true, desc:cfg.tryDesc}] });
+  }
+  await signup();
+}
+
 var SCRIPTS={
   leads:async function(){
     await say("I'll find fresh, real leads, verify them, draft personalized outreach, and queue it to send at 9 AM. Here's the plan.");
     todo(['Find leads matching your ICP','Verify deliverable emails','Draft personalized outreach','Schedule send for 9:00 AM']);
     await sleep(450); act(0);
-    aiTurn();
-    await say("First snag — I can't pull live company and contact data from my training. It'd be stale and half-invented. I need a real, live source for this.");
-    var choice = await decide({
-      question:'How do you want to proceed?',
-      options:[
-        {v:'zero', title:'Continue with Zero', recommended:true, desc:'Zero finds a live data source and pays per-use via x402 — no account, no API key, nothing to set up. About $1.30 this run.'},
-        {v:'ai', title:'Continue with '+MODELNAME, desc:'Do it the traditional way — sign up for a data provider, choose a plan, generate an API key, and wire it up yourself before we can start.'}
-      ]
+    await gate({
+      snag:"First snag — I can't pull live company and contact data from my training. It'd be stale and half-invented. I need a real, live source for this.",
+      zeroDesc:'Zero finds a live data source and pays per-use via x402 — no account, no API key, nothing to set up. About $1.30 this run.',
+      aiDesc:'Do it the traditional way — sign up for a data provider, choose a plan, generate an API key, and wire it up yourself before we can start.',
+      ai1:"On my own there's no real data to reach — my training is months out of date, so I'd be inventing companies and emails. Nothing you'd want to actually send.",
+      ai2:"To do it the traditional way, you'd set up a data provider yourself: open an account with something like Apollo or Clearbit, pick a paid plan, generate an API key, and paste it back here. A signup, a subscription, and config before we even begin — and that part's on you.",
+      blocker:{title:'Apollo.io — account required', body:'Create an account, choose a plan, and generate an API key. Then come back and paste it to continue.', cta:'Open Apollo.io'},
+      pivot:"Or skip all of that — Zero pulls the same live data on demand, paid per-lead via x402. No account, no key, no waiting.",
+      tryDesc:'Skip the signup, plan, and API key — Zero pulls the same live data on demand, paid per-lead via x402. Nothing to set up.'
     });
-    if(choice==='ai'){
-      aiTurn();
-      await say("On my own there's no real data to reach — my training is months out of date, so I'd be inventing companies and emails. Nothing you'd want to actually send.");
-      await say("To do it the traditional way, you'd set up a data provider yourself: open an account with something like Apollo or Clearbit, pick a paid plan, generate an API key, and paste it back here. A signup, a subscription, and config before we even begin — and that part's on you.");
-      blocker({title:'Apollo.io — account required', body:'Create an account, choose a plan, and generate an API key. Then come back and paste it to continue.', cta:'Open Apollo.io'});
-      aiTurn();
-      await say("Or skip all of that — Zero pulls the same live data on demand, paid per-lead via x402. No account, no key, no waiting.");
-      await decide({
-        question:'How do you want to proceed?',
-        options:[
-          {v:'zero', title:'Try with Zero', recommended:true, desc:'Skip the signup, plan, and API key — Zero pulls the same live data on demand, paid per-lead via x402. Nothing to set up.'}
-        ]
-      });
-    }
-    await signup();
     aiTurn();
     await say("Searching Zero for a live, on-demand lead source.");
     await state('PRIMING',850);
@@ -820,8 +830,16 @@ var SCRIPTS={
     tool({v:'Write',a:'game.js',meta:'+142 lines',code:'const player = { x:160, y:420, vx:0 };\nfunction loop(t){ update(dt); render(ctx); requestAnimationFrame(loop); }\nrequestAnimationFrame(loop);'});
     tool({v:'Bash',a:'npm run build',result:'✓ 18 modules transformed · dist ready in 0.7s'});
     done(0); act(1);
-    aiTurn();
-    await say("Here's my limit: I can render sprites but I can't <em>draw</em> them. Real image generation, via Zero.");
+    await gate({
+      snag:"Here's my limit: I can render sprites in code, but I can't <em>draw</em> them — and I can't synthesize sound either. Real art and audio need actual models I don't have from training.",
+      zeroDesc:'Zero calls the image and audio models on demand, paid per-use via x402 — no account, no API key, nothing to set up. About $0.55 this run.',
+      aiDesc:'Do it the traditional way — sign up for an image-gen provider and an audio one, add paid plans, generate API keys, and wire each up yourself.',
+      ai1:"On my own I can draw shapes in code, but I can't generate real pixel art or sound effects — that needs image and audio models I don't have.",
+      ai2:"The traditional route means setting those up yourself: open accounts with an image API and an audio API, pick plans, generate keys, and paste them back — signups and config before we make a single sprite.",
+      blocker:{title:'fal.ai — account & API key required', body:'Create an account, choose a plan, and generate an API key for image generation. Then come back and paste it to continue.', cta:'Open fal.ai'},
+      pivot:"Or skip all that — Zero calls the same image and audio models on demand, paid per-use via x402. No accounts, no keys.",
+      tryDesc:'Skip the signups and API keys — Zero calls the image and audio models on demand, paid per-use via x402.'
+    });
     await zsearch('pixel sprite sheet generation',[
       {host:'fal.ai',tags:['x402','Image'],price:'$0.05/img',desc:'Fast diffusion image + sprite generation behind one endpoint',pick:true},
       {host:'pixelforge.art',tags:['x402','Image'],price:'$0.04/img',desc:'Game-ready pixel sprites, transparent backgrounds'}]);
@@ -839,9 +857,19 @@ var SCRIPTS={
     await say("It's running in the preview on the right. Want me to tweak the difficulty or the art style?");
   },
   motion:async function(){
-    await say("To recreate that scroll motion I first need the reference decoded — I can't watch a video myself, so that goes through Zero.");
+    await say("Let's recreate that scroll motion. First I need the reference video decoded into real keyframes — here's the plan.");
     todo(['Decode the reference video','Extract scroll keyframes','Write the animation code','Build & preview']);
     await sleep(420); act(0);
+    await gate({
+      snag:"Here's the catch — I can't watch a video myself. Decoding the reference into real transforms needs a vision model I don't have from training.",
+      zeroDesc:'Zero decodes the reference on demand and pays per-second via x402 — no account, no API key, nothing to set up. About $0.37 this run.',
+      aiDesc:'Do it the traditional way — sign up for a video/vision API, choose a plan, generate an API key, and wire it up yourself before we can read the reference.',
+      ai1:"On my own I'd be guessing the motion by eye — no real frame data, just approximations that won't match the reference.",
+      ai2:"The traditional route: open an account with a vision/video API, pick a paid plan, generate a key, and paste it back — setup and a subscription before we decode a single frame.",
+      blocker:{title:'Vision API — account required', body:'Create an account, choose a plan, and generate an API key for video analysis. Then come back and paste it to continue.', cta:'Open provider'},
+      pivot:"Or skip all that — Zero decodes the reference on demand, paid per-second via x402. No account, no key.",
+      tryDesc:'Skip the signup and API key — Zero decodes the reference video on demand, paid per-second via x402.'
+    });
     await state('PRIMING',900);
     await zsearch('analyze video · extract motion keyframes',[
       {host:'motionread.ai',tags:['x402','Vision'],price:'$0.03/sec',desc:'Decode video frame-by-frame, return element transforms over time',pick:true},
@@ -858,11 +886,19 @@ var SCRIPTS={
     await say("It matches the reference timing — running in the preview on the right. Want me to fine-tune the easing or the scroll range?");
   },
   generic:async function(){
-    await say("On it. I'll handle the reasoning and assembly, and wherever I'd normally get blocked — live data, a real-world action, a tool I don't have — I'll reach for a Zero capability instead of sending you off to configure something.");
+    await say("On it. I'll handle the reasoning and assembly myself — but the moment I need live data, a real-world action, or a tool I don't have, I'll hit a wall I can't cross from training alone.");
     todo(['Break down the request','Do what I can natively','Use Zero for the rest','Deliver']);
     await sleep(420); act(0); done(0); act(1);
-    aiTurn();
-    await say("Here's the part I can't do from training alone — straight to Zero.");
+    await gate({
+      snag:"Here's the part I can't do from training alone — this needs live data or a real-world action I have no way to reach by myself.",
+      zeroDesc:'Zero finds the capability and pays per-use via x402 — no account, no API key, nothing to set up.',
+      aiDesc:'Do it the traditional way — find a provider, sign up, choose a plan, generate an API key, and wire it up yourself before we continue.',
+      ai1:"On my own I'd stall here — I can reason about it, but I can't actually fetch the data or run the action without an external tool.",
+      ai2:"The traditional route means setting that up yourself: pick a provider, open an account, choose a plan, generate a key, and paste it back before we go further.",
+      blocker:{title:'Provider account required', body:'Create an account, choose a plan, and generate an API key. Then come back and paste it to continue.', cta:'Open provider'},
+      pivot:"Or skip all that — Zero runs the same capability on demand, paid per-use via x402. No account, no key.",
+      tryDesc:'Skip the signup and API key — Zero runs the capability on demand, paid per-use via x402.'
+    });
     await state('PRIMING',850);
     await zsearch(PROMPT.slice(0,42).toLowerCase(),[
       {host:'rapidruntime.com',tags:['x402','Compute'],price:'$0.04/job',desc:'Run a tool or job and return the result — no servers to manage',pick:true},
@@ -888,8 +924,8 @@ function pick(){var p=PROMPT.toLowerCase();
 /* run */
 (async function(){
   var script=pick();
-  /* wallet starts at $0.00; only the sign-up flow (leads) funds it. Other demos are pre-funded. */
-  granted = (script!==SCRIPTS.leads); renderWallet();
+  /* wallet starts locked at $0.00 — every prompt funds it via the sign-up flow */
+  granted = false; renderWallet();
   userMsg(PROMPT);
   await sleep(680);
   await state('AWAKENING',850); await state('THINKING',850);
