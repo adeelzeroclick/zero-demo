@@ -195,11 +195,60 @@ body{margin:0;background:var(--canvas);color:var(--text);font-family:var(--sans)
 .summary .rr.tot{border-top:1px solid var(--border);margin-top:6px;padding-top:6px}
 .summary .rr.tot .h{color:var(--text-2)}
 .summary .rr.tot .c{color:var(--zero);font-weight:500}
+.summary .rr.bal .h{color:var(--text-3)}
+.summary .rr.bal .c{color:var(--ok);font-weight:500}
 
 /* composer */
 /* split workspace: chat column + live preview pane */
 .workspace{flex:1;display:flex;min-height:0}
 .chatcol{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+/* services build-plan panel */
+.plan{flex:none;width:0;overflow:hidden;background:var(--canvas,var(--bg));border-left:1px solid var(--border);
+  transition:width .46s cubic-bezier(.22,.7,.25,1)}
+.workspace.show-plan .plan{width:46%}
+.plan-inner{width:46vw;max-width:600px;height:100%;display:flex;flex-direction:column;box-sizing:border-box}
+.plan-head{flex:none;padding:22px 26px 16px;border-bottom:1px solid var(--border)}
+.plan-title{font-family:var(--heading);font-weight:600;font-size:18px;color:var(--text);margin-bottom:13px}
+.plan-counts{display:flex;gap:8px}
+.pc{display:inline-flex;align-items:center;gap:6px;height:25px;padding:0 9px;border:1px solid var(--border);border-radius:7px;background:var(--bg);
+  font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.3px;text-transform:uppercase;color:var(--text-2)}
+.pc b{color:var(--text);font-weight:500}
+.pc .pic{width:13px;height:13px;color:var(--text-3);display:inline-flex}.pc .pic svg{width:100%;height:100%}
+.plan-body{flex:1;overflow-y:auto;padding:20px 26px 30px}
+.plan-list{position:relative;display:flex;flex-direction:column;gap:18px}
+.plan-list:empty::after{content:"Services and instructions will appear here as the build runs.";display:block;
+  font-family:var(--sans);font-size:13px;line-height:19px;color:var(--text-3);max-width:240px;padding:8px 2px}
+.plan-list:not(:empty)::before{content:"";position:absolute;left:9px;top:8px;bottom:8px;width:1px;background:var(--border)}
+.pnode{position:relative;padding-left:36px;animation:pnode-in .42s cubic-bezier(.2,.7,.3,1)}
+@keyframes pnode-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.pnum{position:absolute;left:0;top:15px;width:19px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--text-3);background:var(--canvas,var(--bg));padding:3px 0}
+.pcard{border:1px solid var(--border);border-radius:12px;background:var(--bg);overflow:hidden}
+.pcard-top{padding:15px 16px;display:flex;flex-direction:column;gap:11px}
+.pcard-row1{display:flex;align-items:flex-start;gap:12px}
+.pcard-name{flex:1;min-width:0;font-family:var(--heading);font-weight:600;font-size:15.5px;color:var(--text)}
+.pcard-price{flex:none;text-align:right;font-family:var(--mono);font-weight:500;font-size:15px;color:var(--text);white-space:nowrap}
+.pcard-price small{display:block;font-size:11px;color:var(--text-3);font-weight:500;margin-top:1px}
+.pbadges{display:flex;flex-wrap:wrap;gap:6px}
+.pbadge{display:inline-flex;align-items:center;gap:4px;height:21px;padding:0 7px;border:1px solid rgba(0,0,0,.08);border-radius:6px;background:var(--surface);
+  font-family:var(--mono);font-weight:500;font-size:10.5px;letter-spacing:.2px;text-transform:uppercase;color:var(--text-2)}
+.pbadge svg{width:11px;height:11px;display:block}
+.pbadge .star{color:#E8A317;display:inline-flex}
+.pcard-foot{border-top:1px solid var(--border);padding:11px 16px;display:flex;align-items:center;gap:10px;min-width:0}
+.pmethod,.plabel{font-family:var(--mono);font-weight:500;font-size:10.5px;letter-spacing:.4px;color:var(--zero);background:var(--zero-soft);border-radius:5px;padding:3px 7px;flex:none}
+.plabel{text-transform:uppercase}
+.pep{font-family:var(--mono);font-size:12.5px;color:var(--text);flex:none}
+.pdesc{font-family:var(--sans);font-size:12.5px;color:var(--text-3);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard-foot .end{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--text-3);flex:none}
+.pcard-foot.inst{flex-direction:column;align-items:flex-start;gap:9px}
+.ptext{font-family:var(--mono);font-size:12.5px;line-height:18px;color:var(--text-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ptext.pt3{-webkit-line-clamp:3}
+.pcard-prompt{border-color:var(--border-med)}
+.pcard-prompt .ptext{color:var(--text);font-family:var(--sans);font-size:13.5px;line-height:19px}
+.pcard-output{border-color:rgba(27,86,26,.32)}
+.pbadge.ok{color:#1B561A;border-color:rgba(27,86,26,.25);background:#E0FAE0}
+.pmethod.ok{color:#1B561A;background:#E0FAE0}
+.pcard-foot .end{cursor:default}
+@media(max-width:880px){.workspace.show-plan .plan{display:none}}
 .preview{flex:0 0 0;width:0;min-width:0;overflow:hidden;background:var(--surface);border-left:1px solid var(--border);
   display:flex;flex-direction:column;transition:flex-basis .55s cubic-bezier(.2,.7,.2,1),width .55s cubic-bezier(.2,.7,.2,1)}
 .workspace.has-preview .preview{flex:0 0 46%;width:46%}
@@ -256,7 +305,7 @@ body{margin:0;background:var(--canvas);color:var(--text);font-family:var(--sans)
 .qopt:hover{background:var(--surface-2);border-color:var(--border)}
 .qopt-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .qopt-t{font-family:var(--sans);font-weight:600;font-size:15px;line-height:21px;color:var(--text)}
-.qopt-t .rec{font-weight:400;color:var(--text-3)}
+.qopt-t .recb{display:inline-block;margin-left:8px;vertical-align:2px;font-family:var(--mono);font-weight:500;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:#fff;background:var(--zero);border-radius:5px;padding:2px 6px;line-height:1.35}
 .qopt-d{font-family:var(--sans);font-size:13px;line-height:19px;color:var(--text-3)}
 .qkey{flex:none;width:27px;height:27px;border:1px solid var(--border);border-radius:7px;background:var(--bg);
   display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--text-3)}
@@ -374,6 +423,18 @@ body{margin:0;background:var(--canvas);color:var(--text);font-family:var(--sans)
     </form>
   </footer>
   </div><!-- /chatcol -->
+  <aside class="plan" id="plan" aria-label="Build plan">
+    <div class="plan-inner">
+      <div class="plan-head">
+        <div class="plan-title">Build Plan</div>
+        <div class="plan-counts">
+          <span class="pc" id="pc-serv"><span class="pic" id="pic-serv"></span><b>0</b>&nbsp;Services</span>
+          <span class="pc" id="pc-inst"><span class="pic" id="pic-inst"></span><b>0</b>&nbsp;Instructions</span>
+        </div>
+      </div>
+      <div class="plan-body" id="plan-body"><div class="plan-list" id="plan-list"></div></div>
+    </div>
+  </aside>
   </div><!-- /workspace -->
 
 <script>
@@ -587,7 +648,7 @@ function signup(){
       var done=false;
       function finish(){ if(done) return; done=true;
         close(); /* close the $5 modal first… */
-        setTimeout(function(){ grantWallet(function(){ resolve(); }); }, 320); /* …then count the project wallet up to $5.00, then continue */ }
+        setTimeout(function(){ revealPlan(); grantWallet(function(){ resolve(); }); }, 320); /* …reveal the services panel, count the wallet up, then continue */ }
       setTimeout(finish, 3000);
     }
     signInStep();
@@ -615,6 +676,66 @@ async function zsearch(query,results){ ensure();
 }
 
 /* zero call container — x402 pay + result */
+/* ── Services build-plan panel ───────────────────────────── */
+var IC_CAP='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12l8 4.5 8-4.5"/><path d="M4 16.5l8 4.5 8-4.5"/></svg>';
+var IC_STAR='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg>';
+var IC_PULSE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12 2.5-6H21"/></svg>';
+var IC_DOC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+var IC_PROV='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4.5"/></svg>';
+var IC_PROMPT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/></svg>';
+var IC_OUT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg>';
+var ZHOST={
+  'leadforge.io':{cap:'Find Leads',prov:'leadforge',method:'POST',ep:'/v1/leads',desc:'Live B2B contact search',rating:'4.7',up:'98%',unit:'/lead'},
+  'mailcheck.dev':{cap:'Verify Emails',prov:'mailcheck',method:'POST',ep:'/v1/verify',desc:'Validate deliverability',rating:'4.6',up:'99%',unit:'/email'},
+  'postalform.com':{cap:'Schedule Send',prov:'postalform',method:'POST',ep:'/v1/schedule',desc:'Queue & send email',rating:'4.5',up:'97%',unit:'/send'},
+  'fal.ai':{cap:'Generate Sprites',prov:'fal',method:'POST',ep:'/v1/images',desc:'Diffusion image generation',rating:'4.8',up:'99%',unit:'/image'},
+  'sunoapi.org':{cap:'Generate Sound',prov:'suno',method:'POST',ep:'/v1/audio',desc:'Text-to-audio synthesis',rating:'4.5',up:'96%',unit:'/clip'},
+  'motionread.ai':{cap:'Analyze Video',prov:'motionread',method:'POST',ep:'/v1/analyze',desc:'Decode motion keyframes',rating:'4.6',up:'98%',unit:'/sec'},
+  'rapidruntime.com':{cap:'Run Job',prov:'rapidruntime',method:'POST',ep:'/v1/run',desc:'Run a tool or job',rating:'4.5',up:'97%',unit:'/job'}
+};
+var PLAN={s:0,i:0,n:0,shown:false};
+(function(){ var a=document.getElementById('pic-serv'), b=document.getElementById('pic-inst'); if(a)a.innerHTML=IC_CAP; if(b)b.innerHTML=IC_DOC; })();
+function revealPlan(){ if(PLAN.shown) return; PLAN.shown=true; var w=document.getElementById('workspace'); if(w)w.classList.add('show-plan'); planPrompt(PROMPT); }
+function planCounts(){ var s=document.querySelector('#pc-serv b'), i=document.querySelector('#pc-inst b'); if(s)s.textContent=PLAN.s; if(i)i.textContent=PLAN.i; }
+function planNode(html, cls){ var list=document.getElementById('plan-list'); if(!list) return; PLAN.n++; var n=document.createElement('div'); n.className='pnode'+(cls?' '+cls:''); n.innerHTML='<span class="pnum">'+PLAN.n+'</span>'+html; list.appendChild(n); var body=document.getElementById('plan-body'); if(body) body.scrollTop=body.scrollHeight; }
+function planPrompt(text){
+  planNode('<div class="pcard pcard-prompt"><div class="pcard-top">'+
+    '<div class="pcard-row1"><div class="pcard-name">Prompt</div></div>'+
+    '<div class="pbadges"><span class="pbadge">'+IC_PROMPT+'Prompt</span></div></div>'+
+    '<div class="pcard-foot inst"><span class="ptext pt3">'+esc(text)+'</span></div></div>', 'io');
+}
+function planOutput(cfg){
+  revealPlan();
+  planNode('<div class="pcard pcard-output"><div class="pcard-top">'+
+    '<div class="pcard-row1"><div class="pcard-name">Live site</div></div>'+
+    '<div class="pbadges"><span class="pbadge ok">'+IC_OUT+'Output</span><span class="pbadge">withzero</span></div></div>'+
+    '<div class="pcard-foot"><span class="pmethod ok">GET</span><span class="pep">'+esc(cfg.url)+'</span><span class="end">↗</span></div></div>', 'io');
+}
+function planService(z, price){
+  revealPlan(); PLAN.s++;
+  var badges='<span class="pbadge">'+IC_CAP+'Capability</span><span class="pbadge">x402</span>'+
+    '<span class="pbadge">'+IC_PROV+esc(z.prov)+'</span>'+
+    '<span class="pbadge"><span class="star">'+IC_STAR+'</span>'+esc(z.rating)+'</span>'+
+    '<span class="pbadge">'+IC_PULSE+esc(z.up)+'</span>';
+  planNode('<div class="pcard"><div class="pcard-top">'+
+      '<div class="pcard-row1"><div class="pcard-name">'+esc(z.cap)+'</div>'+
+        '<div class="pcard-price">'+esc(price)+'<small>'+esc(z.unit)+'</small></div></div>'+
+      '<div class="pbadges">'+badges+'</div></div>'+
+    '<div class="pcard-foot"><span class="pmethod">'+esc(z.method)+'</span><span class="pep">'+esc(z.ep)+'</span><span class="pdesc">'+esc(z.desc)+'</span><span class="end">'+esc(z.end||'—')+'</span></div></div>');
+  planCounts();
+}
+function planInstruction(cfg){
+  revealPlan(); PLAN.i++;
+  var price = (cfg.cost!=null)
+    ? '<div class="pcard-price">$'+Number(cfg.cost).toFixed(3)+(cfg.tokens?'<small>'+esc(cfg.tokens)+' tokens</small>':'<small>/msg</small>')+'</div>'
+    : (cfg.tokens?'<div class="pcard-price">'+esc(cfg.tokens)+'<small>/tokens</small></div>':'');
+  planNode('<div class="pcard"><div class="pcard-top">'+
+      '<div class="pcard-row1"><div class="pcard-name">'+esc(cfg.title)+'</div>'+price+'</div>'+
+      '<div class="pbadges"><span class="pbadge">'+IC_DOC+'Instruction</span></div></div>'+
+    '<div class="pcard-foot inst"><span class="plabel">'+esc(cfg.label||'System Prompt')+'</span><span class="ptext">'+esc(cfg.text)+'</span></div></div>');
+  planCounts();
+}
+
 async function zcall(o){ ensure();
   var c=document.createElement('div'); c.className='zc';
   c.innerHTML='<div class="zh"><span class="z">'+ZSVG+'</span><span class="t"><b>'+esc(o.host)+'</b> · '+esc(o.action)+'</span><span class="x">x402</span></div>'+
@@ -623,16 +744,28 @@ async function zcall(o){ ensure();
   var ps=c.querySelector('#ps'),po=c.querySelector('#po');
   await sleep(560); ps.innerHTML='<span class="v ok">Paid · settled on Tempo</span>';
   await sleep(520); po.style.display='block'; po.textContent=o.result; if(low())down();
-  LEDGER.push({host:o.host,action:o.action,cost:o.cost}); spend(o.cost); await sleep(380);
+  LEDGER.push({host:o.host,action:o.action,cost:o.cost}); spend(o.cost);
+  var z=ZHOST[o.host]; if(z){ var per=(String(o.price).match(/\$[\d.]+/)||['$'+(o.cost||0).toFixed(2)])[0]; planService(z, per); }
+  await sleep(380);
 }
 
 /* completion summary — factual line + x402 receipt from the ledger */
 function result(o){ ensure();
   var rows=LEDGER.map(function(r){return '<div class="rr"><span class="h">'+esc(r.host)+'</span><span class="a">'+esc(r.action)+'</span><span class="c">$'+r.cost.toFixed(2)+'</span></div>';}).join('');
-  var receipt = LEDGER.length ? '<div class="rcp">'+rows+'<div class="rr tot"><span class="h">Zero · '+LEDGER.length+' '+(LEDGER.length>1?'capabilities':'capability')+'</span><span class="c">$'+spent.toFixed(2)+'</span></div></div>' : '';
+  var bal=Math.max(0,WALLET_START-spent);
+  var receipt = LEDGER.length ? '<div class="rcp">'+rows+
+    '<div class="rr tot"><span class="h">Total spent · '+LEDGER.length+' '+(LEDGER.length>1?'capabilities':'capability')+'</span><span class="c">$'+spent.toFixed(2)+'</span></div>'+
+    '<div class="rr bal"><span class="h">Wallet balance</span><span class="c">$'+bal.toFixed(2)+'</span></div></div>' : '';
   var c=document.createElement('div'); c.className='summary';
   c.innerHTML='<div class="sh"><span class="ic">'+CHK+'</span><span class="t">'+esc(o.title)+'</span></div><p class="sl">'+o.line+'</p>'+receipt;
   cur.appendChild(c); if(low())down();
+}
+/* spend breakdown as a plain chat message (not a UI card) */
+function spendText(){
+  var lines=LEDGER.map(function(r){ return '&nbsp;&nbsp;'+esc(r.host)+' · '+esc(r.action)+' — <b>$'+r.cost.toFixed(2)+'</b>'; }).join('<br>');
+  var bal=Math.max(0,WALLET_START-spent);
+  return "Here's the full spend for this build — every capability paid per use via x402:<br>"+lines+
+    '<br>That’s <b>$'+spent.toFixed(2)+'</b> across '+LEDGER.length+' capabilities, and your Zero wallet’s at <b>$'+bal.toFixed(2)+'</b>.';
 }
 
 var I_LOCK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -653,7 +786,7 @@ function decide(config){
     }
     var card=document.createElement('div'); card.className='qcard';
     var rows=config.options.map(function(o,i){
-      return '<button class="qopt" type="button" data-v="'+o.v+'"><span class="qopt-b"><span class="qopt-t">'+esc(o.title)+(o.recommended?' <span class="rec">(Recommended)</span>':'')+'</span><span class="qopt-d">'+esc(o.desc)+'</span></span><span class="qkey">'+(i+1)+'</span></button>';
+      return '<button class="qopt" type="button" data-v="'+o.v+'"><span class="qopt-b"><span class="qopt-t">'+esc(o.title)+(o.recommended?' <span class="recb">Recommended</span>':'')+'</span><span class="qopt-d">'+esc(o.desc)+'</span></span><span class="qkey">'+(i+1)+'</span></button>';
     }).join('');
     card.innerHTML='<div class="qhead">'+esc(config.question)+'</div><div class="qopts">'+rows+'</div>';
     box.appendChild(card);
@@ -739,7 +872,8 @@ async function deploy(slug, srcdoc){
   tool({v:'Build', a:'production bundle', result:'Optimized + minified', bare:true});
   await sleep(520);
   tool({v:'Deploy', a:'site.withzero.ai', result:'Live on Zero hosting', bare:true});
-  spend(0.01);
+  LEDGER.push({host:'site.withzero.ai', action:'hosting', cost:0.01}); spend(0.01);
+  planOutput({url:'site.withzero.ai/s/'+slug});
   await sleep(300);
 }
 (function(){
@@ -760,7 +894,7 @@ async function gate(cfg){
   var choice = await decide({
     question:'How do you want to proceed?',
     options:[
-      {v:'zero', title:'Continue with Zero', recommended:true, desc:cfg.zeroDesc},
+      {v:'zero', title:'Continue with Zero services', recommended:true, desc:cfg.zeroDesc},
       {v:'ai', title:'Continue with '+MODELNAME, desc:cfg.aiDesc}
     ]
   });
@@ -811,6 +945,7 @@ var SCRIPTS={
     await say("This part's on me — I'll write the outreach in your voice, one variant per persona.");
     tool({v:'Write',a:'outreach/templates.md',meta:'3 variants',
       code:'<span style="color:var(--text-3)"># founder-led · 78 words · single CTA</span>\nHi {{first_name}} — saw {{company}} is scaling {{team}}.\nMost teams here lose a week wiring up tooling…'});
+    planInstruction({title:'Personalized Outreach', tokens:'~180', cost:0.002, text:'Write a concise, founder-to-founder cold email in the sender’s voice. One clear CTA, under 80 words, and reference the prospect’s company and recent scaling.'});
     done(2); act(3);
     aiTurn();
     await say("Last step: queue all 23 for 9:00 AM in each recipient's timezone. Sending mail is a Zero capability too — no SMTP, no domain warmup on my side.");
@@ -819,7 +954,8 @@ var SCRIPTS={
     aiTurn();
     await say("I also published a live dashboard so you can watch the queue — bundling and publishing it to Zero hosting.");
     await deploy('outreach-9am', SITES.leads);
-    await say("<span class='ok'>✓</span> Published — your campaign dashboard is live at <b class='url'>site.withzero.ai/s/outreach-9am</b>. Spent <b>$0.01</b> on hosting.");
+    await say("<span class='ok'>✓</span> Published — your campaign dashboard is live at <b class='url'>site.withzero.ai/s/outreach-9am</b>.");
+    await say(spendText());
     await say("The 23 emails are queued for 9:00 AM in each recipient's local timezone. Want me to adjust the copy or the send time?");
   },
   game:async function(){
@@ -853,8 +989,9 @@ var SCRIPTS={
     await say("Engine's done — bundling and publishing it to Zero hosting.");
     await deploy('pixel-dash', SITES.game);
     done(3);
-    await say("<span class='ok'>✓</span> Published — Pixel Dash is live at <b class='url'>site.withzero.ai/s/pixel-dash</b>. Spent <b>$0.01</b> on hosting.");
-    await say("It's running in the preview on the right. Want me to tweak the difficulty or the art style?");
+    await say("<span class='ok'>✓</span> Published — Pixel Dash is live at <b class='url'>site.withzero.ai/s/pixel-dash</b>.");
+    await say(spendText());
+    await say("Want me to tweak the difficulty or the art style?");
   },
   motion:async function(){
     await say("Let's recreate that scroll motion. First I need the reference video decoded into real keyframes — here's the plan.");
@@ -882,8 +1019,9 @@ var SCRIPTS={
     await say("Bundling and publishing the build to Zero hosting.");
     await deploy('scroll-scene', SITES.motion);
     done(2); done(3);
-    await say("<span class='ok'>✓</span> Published — your scroll scene is live at <b class='url'>site.withzero.ai/s/scroll-scene</b>. Spent <b>$0.01</b> on hosting.");
-    await say("It matches the reference timing — running in the preview on the right. Want me to fine-tune the easing or the scroll range?");
+    await say("<span class='ok'>✓</span> Published — your scroll scene is live at <b class='url'>site.withzero.ai/s/scroll-scene</b>.");
+    await say(spendText());
+    await say("Want me to fine-tune the easing or the scroll range?");
   },
   generic:async function(){
     await say("On it. I'll handle the reasoning and assembly myself — but the moment I need live data, a real-world action, or a tool I don't have, I'll hit a wall I can't cross from training alone.");
@@ -911,8 +1049,9 @@ var SCRIPTS={
     await say("Stitching that together — then bundling and publishing the result to Zero hosting.");
     await deploy('your-project', SITES.generic);
     done(3);
-    await say("<span class='ok'>✓</span> Published — your project is live at <b class='url'>site.withzero.ai/s/your-project</b>. Spent <b>$0.01</b> on hosting.");
-    await say("It's live in the preview on the right. Anything you'd like me to change?");
+    await say("<span class='ok'>✓</span> Published — your project is live at <b class='url'>site.withzero.ai/s/your-project</b>.");
+    await say(spendText());
+    await say("Anything you'd like me to change?");
   }
 };
 function pick(){var p=PROMPT.toLowerCase();
